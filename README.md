@@ -74,3 +74,4 @@ See [`values.yaml`](values.yaml).
 ## Releases
 
 Releases are automated by [release-please](https://github.com/googleapis/release-please). Use [Conventional Commits](https://www.conventionalcommits.org/) — `feat:` bumps the minor version, `fix:` bumps the patch, `feat!:` / `BREAKING CHANGE:` bumps the major. release-please opens a release PR on every push to `main`; merging it creates a tag, a GitHub Release, and bumps `version` in `Chart.yaml`.
+
