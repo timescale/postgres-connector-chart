@@ -565,7 +565,10 @@
               {
                 "id": "custom.lineStyle",
                 "value": {
-                  "dash": [10, 10],
+                  "dash": [
+                    10,
+                    10
+                  ],
                   "fill": "dash"
                 }
               },
@@ -1058,7 +1061,7 @@
         "x": 12,
         "y": 26
       },
-      "id": 13,
+      "id": 402,
       "options": {
         "legend": {
           "calcs": [
