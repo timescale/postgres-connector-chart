@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "postgres-connector.fullname" . }}
+  labels:
+    {{- include "postgres-connector.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: grpc
+      port: {{ .Values.service.grpcPort }}
+      targetPort: grpc
+      protocol: TCP
+      appProtocol: grpc
+    - name: metrics
+      port: {{ .Values.service.prometheusPort }}
+      targetPort: metrics
+      protocol: TCP
+      appProtocol: http
+  selector:
+    {{- include "postgres-connector.selectorLabels" . | nindent 4 }}
