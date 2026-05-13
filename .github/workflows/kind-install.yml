@@ -1,0 +1,58 @@
+name: kind-install
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4 * * *"
+  pull_request:
+    paths:
+      - 'templates/**'
+      - 'Chart.yaml'
+      - 'values.yaml'
+      - 'ci/**'
+      - '.github/workflows/kind-install.yml'
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.15.0
+
+      - uses: helm/kind-action@v1
+        with:
+          cluster_name: postgres-connector-ci
+
+      - name: Install Prometheus Operator CRDs
+        run: |
+          kubectl apply --server-side -f \
+            https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.74.0/example/prometheus-operator-crd/monitoring.coreos.com_servicemonitors.yaml
+
+      - name: Create namespace with restricted PodSecurity admission
+        run: |
+          kubectl create namespace pgc
+          kubectl label namespace pgc \
+            pod-security.kubernetes.io/enforce=restricted \
+            pod-security.kubernetes.io/enforce-version=latest
+
+      - name: Install chart
+        run: |
+          helm install pgc . \
+            --namespace pgc \
+            --values ci/default-values.yaml \
+            --wait \
+            --timeout 3m
+
+      - name: Diagnostics on failure
+        if: failure()
+        run: |
+          kubectl get pods,svc,secrets,configmaps,servicemonitors -A
+          kubectl -n pgc describe deployment pgc-postgres-connector || true
+          kubectl -n pgc logs -l app.kubernetes.io/name=postgres-connector --tail=200 || true
+
+      - name: Uninstall chart
+        if: always()
+        run: helm uninstall pgc --namespace pgc || true

@@ -1,0 +1,91 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: docker.io/timescale/connector-src-postgres
+  tag: latest
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+# - name: my-registry-secret
+
+# config.yaml content. Schema: live-sync/pkg/config/config.go.
+# Use $VAR for credentials and inject via `env` below.
+config: ~
+# config:
+#   version: 1
+#   connectors:
+#     - id: my-connector
+#       source:
+#         database_url: $SOURCE_URL
+#         publications:
+#           - my_publication
+#       target:
+#         database_url: $TARGET_URL
+#         tables:
+#           - source: { schema_name: public, table_name: metrics }
+
+# Environment variables passed to the container. Use this to inject
+# credentials referenced from `config` via $VAR expansion.
+env: []
+# - name: SOURCE_URL
+#   valueFrom:
+#     secretKeyRef:
+#       name: db-creds
+#       key: source-url
+
+logLevel: info
+logAsJSON: true
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+serviceAccount:
+  create: true
+  name: ""
+  annotations: {}
+
+service:
+  type: ClusterIP
+  grpcPort: 6787
+  prometheusPort: 6788
+  annotations: {}
+
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
+  relabelings: []
+  metricRelabelings: []
+
+grafana:
+  dashboard:
+    enabled: true
+    # The grafana_dashboard: "1" label is picked up by the kube-prometheus-stack
+    # Grafana sidecar. Adjust if your Grafana uses a different discovery label.
+    labels:
+      grafana_dashboard: "1"
+    annotations: {}
+
+# With replicas hardcoded to 1, enabling a PDB with minAvailable: 1 blocks
+# voluntary node drains. Set maxUnavailable: 1 instead if you only need a
+# disruption *signal* without blocking maintenance.
+podDisruptionBudget:
+  enabled: false
+  minAvailable: 1
+  # maxUnavailable: 0
+
+podAnnotations: {}
+commonLabels: {}
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+terminationGracePeriodSeconds: 30

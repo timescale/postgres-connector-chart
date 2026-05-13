@@ -1,0 +1,17 @@
+# Patterns to ignore when building packages.
+.DS_Store
+.git/
+.gitignore
+.bumpversion.cfg
+.circleci/
+.github/
+.travis.yml
+.vscode/
+.idea/
+*.swp
+*.bak
+*.tmp
+*.orig
+*~
+OWNERS
+ci/

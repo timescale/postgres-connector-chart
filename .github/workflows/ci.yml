@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        values:
+          - ci/default-values.yaml
+          - ci/minimal-values.yaml
+        kubernetes-version:
+          - "1.28.0"
+          - "1.29.0"
+          - "1.30.0"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: azure/setup-helm@v4
+        with:
+          version: v3.15.0
+
+      - name: Install kubeconform
+        run: |
+          curl -sSL -o /tmp/kubeconform.tar.gz \
+            https://github.com/yannh/kubeconform/releases/download/v0.6.7/kubeconform-linux-amd64.tar.gz
+          tar -xzf /tmp/kubeconform.tar.gz -C /tmp
+          sudo mv /tmp/kubeconform /usr/local/bin/kubeconform
+
+      - name: helm lint
+        run: helm lint . --values ${{ matrix.values }}
+
+      - name: helm template
+        run: helm template test . --values ${{ matrix.values }} > /tmp/manifests.yaml
+
+      - name: kubeconform validate
+        run: |
+          kubeconform \
+            -strict \
+            -summary \
+            -kubernetes-version ${{ matrix.kubernetes-version }} \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/0c4b71928a420187ee523cf3e11b311dcb2b6649/{{ .Group }}/{{ .ResourceKind | lower }}_{{ .ResourceAPIVersion }}.json' \
+            /tmp/manifests.yaml

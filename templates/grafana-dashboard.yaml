@@ -1,0 +1,18 @@
+{{- if .Values.grafana.dashboard.enabled -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "postgres-connector.fullname" . }}-dashboard
+  labels:
+    {{- include "postgres-connector.labels" . | nindent 4 }}
+    {{- with .Values.grafana.dashboard.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- with .Values.grafana.dashboard.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+data:
+  postgres-connector.json: |-
+{{ .Files.Get "dashboards/postgres-connector.json" | indent 4 }}
+{{- end -}}
