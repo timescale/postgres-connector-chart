@@ -42,9 +42,15 @@ jobs:
         run: |
           helm install pgc . \
             --namespace pgc \
-            --values ci/default-values.yaml \
-            --wait \
-            --timeout 3m
+            --values ci/default-values.yaml
+
+      - name: Verify pod admitted under restricted PSA
+        run: |
+          # Pod existence proves PSA admission passed (PSA denies at pod creation
+          # time). We don't wait for Ready because the image isn't published yet.
+          kubectl -n pgc wait --for=condition=PodScheduled pod \
+            -l app.kubernetes.io/name=postgres-connector \
+            --timeout=60s
 
       - name: Diagnostics on failure
         if: failure()

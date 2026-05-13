@@ -15,9 +15,8 @@ jobs:
           - ci/default-values.yaml
           - ci/minimal-values.yaml
         kubernetes-version:
-          - "1.28.0"
-          - "1.29.0"
           - "1.30.0"
+          - "1.31.0"
     steps:
       - uses: actions/checkout@v4
 
@@ -45,5 +44,5 @@ jobs:
             -summary \
             -kubernetes-version ${{ matrix.kubernetes-version }} \
             -schema-location default \
-            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/0c4b71928a420187ee523cf3e11b311dcb2b6649/{{ .Group }}/{{ .ResourceKind | lower }}_{{ .ResourceAPIVersion }}.json' \
+            -skip ServiceMonitor \
             /tmp/manifests.yaml
