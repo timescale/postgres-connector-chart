@@ -14,7 +14,7 @@ on:
 
 jobs:
   install:
-    runs-on: [self-hosted, non-prod]
+    runs-on: non-prod
     steps:
       - uses: actions/checkout@v4
 

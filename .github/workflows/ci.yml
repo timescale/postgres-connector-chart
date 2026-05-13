@@ -7,7 +7,7 @@ on:
 
 jobs:
   lint-and-validate:
-    runs-on: [self-hosted, non-prod]
+    runs-on: non-prod
     strategy:
       fail-fast: false
       matrix:
