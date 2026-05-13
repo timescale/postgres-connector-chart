@@ -2,7 +2,7 @@ apiVersion: v2
 name: postgres-connector
 description: Timescale Postgres connector — replicates Postgres into TimescaleDB.
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: ""
 kubeVersion: ">=1.23.0-0"
 home: https://github.com/timescale/postgres-connector-chart
