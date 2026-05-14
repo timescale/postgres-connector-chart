@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/timescale/postgres-connector-chart/compare/v0.1.1...v0.1.2) (2026-05-14)
+
+
+### Bug Fixes
+
+* drop runAsUser/runAsGroup pin now that image ships numeric UID ([#7](https://github.com/timescale/postgres-connector-chart/issues/7)) ([f35d700](https://github.com/timescale/postgres-connector-chart/commit/f35d700fbbb3bdf2049756eb3c7bbffa178b7788))
+* pin numeric UID for non-root verification; document credentials Secret ([#5](https://github.com/timescale/postgres-connector-chart/issues/5)) ([599b2b8](https://github.com/timescale/postgres-connector-chart/commit/599b2b89a582f2746d2bda8ed4abfc37405bd1ac))
+
 ## [0.1.1](https://github.com/timescale/postgres-connector-chart/compare/v0.1.0...v0.1.1) (2026-05-13)
 
 
