@@ -63,6 +63,24 @@ env:
 
 The `config` block is rendered into a Kubernetes Secret and mounted at `/etc/connector/config.yaml`. Use `$VAR` expansion in `database_url` fields for credentials and inject the variables via `env`.
 
+### Database credentials Secret
+
+The chart does not manage database credentials. Create the Secret referenced by `env` separately so the connection strings stay out of your values file (and out of source control). Minimal example:
+
+```yaml
+# db-creds.yaml — apply with: kubectl apply -f db-creds.yaml -n <namespace>
+apiVersion: v1
+kind: Secret
+metadata:
+  name: db-creds
+type: Opaque
+stringData:
+  source-url: "postgres://USER:PASS@SOURCE_HOST:5432/DBNAME?sslmode=require"
+  target-url: "postgres://USER:PASS@TARGET_HOST:5432/DBNAME?sslmode=require"
+```
+
+`stringData` lets you paste plain connection strings; Kubernetes base64-encodes them on apply. The Secret must live in the same namespace as the release.
+
 ## Config schema
 
 Top-level:
