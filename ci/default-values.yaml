@@ -3,7 +3,7 @@
 # never actually executed in CI; only used to render the manifests.
 
 image:
-  tag: "0.1.0"
+  tag: "latest"
 
 config:
   version: 1
