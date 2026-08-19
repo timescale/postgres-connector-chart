@@ -35,27 +35,41 @@ helm install postgres-connector . -f my-values.yaml
 config:
   version: 1
   connectors:
-    - id: my-connector
+    - id: high-volume-metrics
       source:
-        database_url: $SOURCE_URL
+        database_url: $SOURCE_URL1
         publications:
-          - my_publication
+          - metrics_pub
       target:
         database_url: $TARGET_URL
         tables:
           - source:
               schema_name: public
-              table_name: metrics
+              table_name: metrics1
             hypertable_config:
               primary_dimension:
                 column_name: time
                 range:
                   partition_interval: 1 day
+    - id: low-volume-metrics
+      source:
+        database_url: $SOURCE_URL2
+        publications:
+          - metrics_pub2
+      target:
+        database_url: $TARGET_URL
+        tables:
+          - source:
+              schema_name: public
+              table_name: metrics2
 
 env:
-  - name: SOURCE_URL
+  - name: SOURCE_URL1
     valueFrom:
-      secretKeyRef: { name: db-creds, key: source-url }
+      secretKeyRef: { name: db-creds, key: source-url-1 }
+  - name: SOURCE_URL2
+    valueFrom:
+      secretKeyRef: { name: db-creds, key: source-url-2 }
   - name: TARGET_URL
     valueFrom:
       secretKeyRef: { name: db-creds, key: target-url }
@@ -75,11 +89,20 @@ metadata:
   name: db-creds
 type: Opaque
 stringData:
-  source-url: "postgres://USER:PASS@SOURCE_HOST:5432/DBNAME?sslmode=require"
+  source-url-1: "postgres://USER:PASS@SOURCE_HOST1:5432/DBNAME?sslmode=require"
+  source-url-2: "postgres://USER:PASS@SOURCE_HOST2:5432/DBNAME?sslmode=require"
   target-url: "postgres://USER:PASS@TARGET_HOST:5432/DBNAME?sslmode=require"
 ```
 
 `stringData` lets you paste plain connection strings; Kubernetes base64-encodes them on apply. The Secret must live in the same namespace as the release.
+
+## Multiple connectors
+
+The `connectors` list accepts more than one connector, as in the example above. Each entry is fully isolated: own replication slot, own publications, own source and target.
+
+Multiple connectors in one instance share one pod, so one restart or crash affects all of them: a higher blast radius than separate instances. A high-throughput connector can also consume most CPU and memory and starve a low-throughput connector (noisy neighbor).
+
+Do not pack too many connectors into one pod. A few connectors (for example 5 to 10) are fine, but the safe number depends on the load of each connector. Onboard connectors one by one and assess the resource impact before you add more. Use separate instances when a connector needs its own resource limits or independent rollouts.
 
 ## Config schema
 
